@@ -1,0 +1,156 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage[singlelinecheck=false]{caption}
+\usepackage{float}
+
+\captionsetup[table]{skip=0pt}
+
+\begin{document}
+
+\noindent Домашняя работа по дискретной математике \\
+<<Раскраска графа с помощью упорядочивания вершин>> \\
+Студент: Суркис Антон Игоревич \\
+Группа: P3113
+\pagestyle{fancy}
+\fancyhead[L]{Вариант 182}
+\fancyhead[R]{Лист {\thepage} из \pageref{LastPage}}
+\fancyfoot{}
+
+\begin{table}[H]
+    \caption{Исходный граф}
+    \begin{tabular}{|l|*{12}{c|}}
+        \hline
+                 & $e_1$ & $e_2$ & $e_3$ & $e_4$ & $e_5$ & $e_6$ & $e_7$ & $e_8$ & $e_9$ & $e_{10}$ & $e_{11}$ & $e_{12}$ \\ \hline
+        $e_{ 1}$ &     0 &     3 &       &     2 &       &     1 &     5 &     4 &     4 &          &          &        1 \\ \hline
+        $e_{ 2}$ &     3 &     0 &     3 &     2 &       &     3 &       &     4 &       &        5 &        4 &        4 \\ \hline
+        $e_{ 3}$ &       &     3 &     0 &       &       &       &     2 &       &     4 &        1 &        4 &        5 \\ \hline
+        $e_{ 4}$ &     2 &     2 &       &     0 &       &       &     1 &       &       &        1 &        2 &          \\ \hline
+        $e_{ 5}$ &       &       &       &       &     0 &       &       &     4 &     1 &          &          &          \\ \hline
+        $e_{ 6}$ &     1 &     3 &       &       &       &     0 &       &       &       &          &          &        1 \\ \hline
+        $e_{ 7}$ &     5 &       &     2 &     1 &       &       &     0 &     4 &     4 &          &          &        5 \\ \hline
+        $e_{ 8}$ &     4 &     4 &       &       &     4 &       &     4 &     0 &     1 &        2 &        5 &        4 \\ \hline
+        $e_{ 9}$ &     4 &       &     4 &       &     1 &       &     4 &     1 &     0 &          &        5 &          \\ \hline
+        $e_{10}$ &       &     5 &     1 &     1 &       &       &       &     2 &       &        0 &          &          \\ \hline
+        $e_{11}$ &       &     4 &     4 &     2 &       &       &       &     5 &     5 &          &        0 &        5 \\ \hline
+        $e_{12}$ &     1 &     4 &     5 &       &       &     1 &     5 &     4 &       &          &        5 &        0 \\ \hline
+    \end{tabular}
+\end{table}
+
+\bigskip
+\noindent\begin{minipage}[0cm]{\textwidth}
+    Шаг №1.
+    \begin{table}[H]
+        \caption{Сортировка вершин по количеству ребер (степени)}
+        \begin{tabular}{l|*{12}{c}|c}
+                     & $e_8$ & $e_2$ & $e_{12}$ & $e_1$ & $e_{11}$ & $e_9$ & $e_7$ & $e_3$ & $e_4$ & $e_{10}$ & $e_6$ & $e_5$ & $r_i$ \\ \hline
+            $e_{ 8}$ &     0 &     1 &        1 &     1 &        1 &     1 &     1 &     0 &     0 &        1 &     0 &     1 &     8 \\
+            $e_{ 2}$ &       &     0 &        1 &     1 &        1 &     0 &     0 &     1 &     1 &        1 &     1 &     0 &     8 \\
+            $e_{12}$ &       &       &        0 &     1 &        1 &     0 &     1 &     1 &     0 &        0 &     1 &     0 &     7 \\
+            $e_{ 1}$ &       &       &          &     0 &        0 &     1 &     1 &     0 &     1 &        0 &     1 &     0 &     7 \\
+            $e_{11}$ &       &       &          &       &        0 &     1 &     0 &     1 &     1 &        0 &     0 &     0 &     6 \\
+            $e_{ 9}$ &       &       &          &       &          &     0 &     1 &     1 &     0 &        0 &     0 &     1 &     6 \\
+            $e_{ 7}$ &       &       &          &       &          &       &     0 &     1 &     1 &        0 &     0 &     0 &     6 \\
+            $e_{ 3}$ &       &       &          &       &          &       &       &     0 &     0 &        1 &     0 &     0 &     6 \\
+            $e_{ 4}$ &       &       &          &       &          &       &       &       &     0 &        1 &     0 &     0 &     5 \\
+            $e_{10}$ &       &       &          &       &          &       &       &       &       &        0 &     0 &     0 &     4 \\
+            $e_{ 6}$ &       &       &          &       &          &       &       &       &       &          &     0 &     0 &     3 \\
+            $e_{ 5}$ &       &       &          &       &          &       &       &       &       &          &       &     0 &     2 \\
+        \end{tabular}
+    \end{table}
+    В цвет №1 красим вершины №№ 8, 3, 4 и 6
+\end{minipage}
+
+\bigskip
+\noindent\begin{minipage}[0cm]{\textwidth}
+    Шаг №2.
+    \begin{table}[H]
+        \caption{Неокрашенные до шага №2 вершины}
+        \begin{tabular}{l|*{8}{c}|c}
+                    & $e_2$ & $e_{12}$ & $e_1$ & $e_{11}$ & $e_9$ & $e_7$ & $e_{10}$ & $e_5$ & $r_i$ \\ \hline
+            $e_{ 2}$ &     0 &        1 &     1 &        1 &     0 &     0 &        1 &     0 &    8 \\
+            $e_{12}$ &       &        0 &     1 &        1 &     0 &     1 &        0 &     0 &    7 \\
+            $e_{ 1}$ &       &          &     0 &        0 &     1 &     1 &        0 &     0 &    7 \\
+            $e_{11}$ &       &          &       &        0 &     1 &     0 &        0 &     0 &    6 \\
+            $e_{ 9}$ &       &          &       &          &     0 &     1 &        0 &     1 &    6 \\
+            $e_{ 7}$ &       &          &       &          &       &     0 &        0 &     0 &    6 \\
+            $e_{10}$ &       &          &       &          &       &       &        0 &     0 &    4 \\
+            $e_{ 5}$ &       &          &       &          &       &       &          &     0 &    2 \\
+        \end{tabular}
+    \end{table}
+    В цвет №2 красим вершины №№ 2 и 9
+\end{minipage}
+
+\bigskip
+\noindent\begin{minipage}[0cm]{\textwidth}
+    Шаг №3.
+    \begin{table}[H]
+        \caption{Неокрашенные до шага №3 вершины}
+        \begin{tabular}{l|*{6}{c}|c}
+                     & $e_{12}$ & $e_1$ & $e_{11}$ & $e_7$ & $e_{10}$ & $e_5$ & $r_i$ \\ \hline
+            $e_{12}$ &        0 &     1 &        1 &     1 &        0 &     0 &     7 \\
+            $e_{ 1}$ &          &     0 &        0 &     1 &        0 &     0 &     7 \\
+            $e_{11}$ &          &       &        0 &     0 &        0 &     0 &     6 \\
+            $e_{ 7}$ &          &       &          &     0 &        0 &     0 &     6 \\
+            $e_{10}$ &          &       &          &       &        0 &     0 &     4 \\
+            $e_{ 5}$ &          &       &          &       &          &     0 &     2 \\
+        \end{tabular}
+    \end{table}
+    В цвет №3 красим вершины №№ 12, 10 и 5
+\end{minipage}
+
+\bigskip
+\noindent\begin{minipage}[0cm]{\textwidth}
+    Шаг №4.
+    \begin{table}[H]
+        \raggedright
+        \caption{Неокрашенные до шага №4 вершины}
+        \begin{tabular}{l|*{3}{c}|c}
+                & $e_1$ & $e_{11}$ & $e_7$ & $r_i$ \\ \hline
+        $e_{ 1}$ &    0 &       0  &    1  &     7 \\
+        $e_{11}$ &      &       0  &    0  &     6 \\
+        $e_{ 7}$ &      &          &    0  &     6 \\
+        \end{tabular}
+    \end{table}
+    В цвет №4 красим вершины №№ 1 и 11
+\end{minipage}
+
+\bigskip
+\noindent\begin{minipage}[0cm]{\textwidth}
+    Шаг №5.
+    \begin{table}[H]
+        \caption{Неокрашенные до шага №5 вершины}
+        \begin{tabular}{l|*{1}{c}|c}
+        &$e_7$&$r_i$ \\
+        $e_7$&0&6 \\
+        \end{tabular}
+    \end{table}
+    В цвет №5 красим вершину № 7
+\end{minipage}
+
+\bigskip
+\noindent\begin{minipage}[0cm]{\textwidth}
+    Итого:
+    \begin{table}[H]
+        \begin{tabular}{r|l}
+            Вершина  & Цвет \\ \hline
+            $e_{ 1}$ &    4 \\
+            $e_{ 2}$ &    2 \\
+            $e_{ 3}$ &    1 \\
+            $e_{ 4}$ &    1 \\
+            $e_{ 5}$ &    3 \\
+            $e_{ 6}$ &    1 \\
+            $e_{ 7}$ &    5 \\
+            $e_{ 8}$ &    1 \\
+            $e_{ 9}$ &    2 \\
+            $e_{10}$ &    3 \\
+            $e_{11}$ &    4 \\
+            $e_{12}$ &    3 \\
+        \end{tabular}
+    \end{table}
+\end{minipage}
+
+\end{document}
