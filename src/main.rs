@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
+#![allow(unused)]
 
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
 struct Graph {
@@ -237,6 +238,9 @@ impl Graph {
         let mut log = Vec::new();
 
         loop {
+            if s == t {
+                break;
+            }
             let Q = collapsed_edges
                 .iter()
                 .filter_map(|&(i, j, w)| if i == s || j == s { Some(w) } else { None })
@@ -276,18 +280,19 @@ impl Graph {
             }
 
             let to_shrink: Vec<Vec<_>> = {
-                let mut shrink_vec = collapse_into.clone();
-                shrink_vec.dedup();
+                let mut shrink_vec = Vec::new();
+                for i in 0..collapse_into.len() {
+                    let mut to_push = Vec::new();
+                    for j in 0..collapse_into.len() {
+                        if collapse_into[j] == i {
+                            to_push.push(j);
+                        }
+                    }
+                    if !to_push.is_empty() {
+                        shrink_vec.push(to_push);
+                    }
+                }
                 shrink_vec
-                    .iter()
-                    .map(|i| {
-                        collapse_into
-                            .iter()
-                            .enumerate()
-                            .filter_map(|(j, to)| if to == i { Some(j) } else { None })
-                            .collect()
-                    })
-                    .collect()
             };
 
             let mut new_collapsed_vertices = Vec::new();
@@ -317,6 +322,7 @@ impl Graph {
                         to_push.push(k);
                     }
                 }
+                to_push.sort();
                 new_collapsed_vertices.push(to_push);
             }
             collapsed_vertices = new_collapsed_vertices;
@@ -331,48 +337,93 @@ impl Graph {
 
         for step in 0..log.len() {
             let (s, t, vertices, edges, Q, to_collapse) = &log[step];
-            println!("Step {}:", step);
-            println!(r"$s={},t={},Q={}$\\", s + 1, t + 1, Q);
-            for i in 0..vertices.len() {
-                print!("$v_{{{}}}=[", i);
-                for j in 0..vertices[i].len() {
-                    if j != 0 {
-                        print!(",");
+            let (s, t, Q) = (*s, *t, *Q);
+
+            let node_names: Vec<String> = vertices
+                .iter()
+                .map(|v| {
+                    v.iter()
+                        .map(|&i| format!("e_{{{}}}", i + 1))
+                        .fold("".into(), |a, b| format!("{},{}", a, b))
+                        .chars()
+                        .skip(1)
+                        .collect()
+                })
+                .collect();
+            let paren_node_names: Vec<_> = node_names
+                .iter()
+                .enumerate()
+                .map(|(i, s)| {
+                    if vertices[i].len() == 1 {
+                        s.clone()
+                    } else {
+                        format!("({})", s.clone())
                     }
-                    print!("e_{{{}}}", vertices[i][j]);
+                })
+                .collect();
+            println!(r"\bigskip");
+            println!(r"\noindent");
+            println!(r"\begin{{minipage}}{{\textwidth}}");
+            println!(r"Шаг {}\\", step + 1);
+
+            println!(r"Вершины:\\");
+            for i in 0..vertices.len() {
+                println!(r"\mbox{{${}$}},", paren_node_names[i]);
+            }
+            println!(r"\\");
+            println!(r"\mbox{{$s={},t={}$}}\\", paren_node_names[s], paren_node_names[t]);
+
+            println!(r"Ребра:\\");
+            for &(e1, e2, w) in edges.iter() {
+                println!(
+                    r"\mbox{{$({};{})$ длины {}}},",
+                    paren_node_names[e1], paren_node_names[e2], w
+                );
+            }
+            println!(r"\\");
+
+            println!(r"Ребра сечения $K_{{{}}}$:\\", step + 1);
+            for &(e1, e2, w) in edges.iter() {
+                if e1 == s || e2 == s {
+                    println!(
+                        r"\mbox{{$({};{})$ длины {}}},",
+                        paren_node_names[e1], paren_node_names[e2], w
+                    );
                 }
-                println!(r"]$\\");
             }
-            for (i, j, w) in edges {
-                println!(r"$q_{{{},{}}}={}$\\", i, j, w);
+            println!(r"\\");
+            println!(r"$Q={}$\\", Q);
+
+            println!(r"Слияние вершин:\\");
+            for &(e1, e2) in to_collapse.iter() {
+                println!(
+                    r"\mbox{{$({},{})$}},",
+                    node_names[e1], node_names[e2]
+                );
             }
-            for (i, j) in to_collapse {
-                println!(r"$(v_{{{}}},v_{{{}}})$\\", i, j);
-            }
-            println!();
-            println!();
+            println!(r"\end{{minipage}}");
         }
     }
 }
 
 fn main() {
     let variant = Graph::variant();
-    for i in 0..variant.node_count {
-        print!("&$e_{{{}}}$", i + 1);
-    }
-    println!(r"\\");
-    for i in 0..variant.node_count {
-        print!("$e_{{{}}}$", i + 1);
-        for j in 0..variant.node_count {
-            print!("&");
-            match variant.edge_weights[i][j] {
-                Some(num) => print!("{}", num),
-                _ => {}
-            }
-        }
-        println!(r"\\");
-    }
-    println!();
+    // for i in 0..variant.node_count {
+    //     print!("&$e_{{{}}}$", i + 1);
+    // }
+    // println!(r"\\");
+    // for i in 0..variant.node_count {
+    //     print!("$e_{{{}}}$", i + 1);
+    //     for j in 0..variant.node_count {
+    //         print!("&");
+    //         match variant.edge_weights[i][j] {
+    //             Some(num) => print!("{}", num),
+    //             _ => {}
+    //         }
+    //     }
+    //     println!(r"\\");
+    // }
+    // println!();
 
-    Graph::variant().frank_frish(4, 5);
+    variant.frank_frish(4, 5);
 }
