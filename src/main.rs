@@ -272,28 +272,35 @@ impl Graph {
             }
 
             let mut collapse_into: Vec<_> = (0..collapsed_vertices.len()).collect();
-            for &(i, j) in &to_collapse {
-                collapse_into[j] = i;
-            }
-            for i in 0..collapsed_vertices.len() {
-                collapse_into[i] = collapse_into[collapse_into[i]];
-            }
-
-            let to_shrink: Vec<Vec<_>> = {
-                let mut shrink_vec = Vec::new();
-                for i in 0..collapse_into.len() {
-                    let mut to_push = Vec::new();
-                    for j in 0..collapse_into.len() {
-                        if collapse_into[j] == i {
-                            to_push.push(j);
-                        }
-                    }
-                    if !to_push.is_empty() {
-                        shrink_vec.push(to_push);
+            loop {
+                let mut collapsed_something = false;
+                for &(i, j) in &to_collapse {
+                    let gi = collapse_into[i];
+                    let gj = collapse_into[j];
+                    let min = if gi < gj { gi } else { gj };
+                    if collapse_into[i] != min || collapse_into[j] != min {
+                        collapse_into[i] = min;
+                        collapse_into[j] = min;
+                        collapsed_something = true;
                     }
                 }
-                shrink_vec
-            };
+                if !collapsed_something {
+                    break;
+                }
+            }
+
+            let mut to_shrink = Vec::new();
+            for i in 0..collapse_into.len() {
+                let mut to_push = Vec::new();
+                for j in 0..collapse_into.len() {
+                    if collapse_into[j] == i {
+                        to_push.push(j);
+                    }
+                }
+                if !to_push.is_empty() {
+                    to_shrink.push(to_push);
+                }
+            }
 
             let mut new_collapsed_vertices = Vec::new();
             for i in 0..to_shrink.len() {
@@ -331,8 +338,9 @@ impl Graph {
                 .iter()
                 .filter_map(|&(i, j, w)| if i != j { Some((i, j, w)) } else { None })
                 .collect();
-            collapsed_edges.sort_by_key(|&(i, j, _)| (i, j));
-            collapsed_edges.dedup();
+            collapsed_edges.sort();
+            collapsed_edges.reverse();
+            collapsed_edges.dedup_by_key(|&mut (i, j, _)| (i, j));
         }
 
         for step in 0..log.len() {
@@ -366,21 +374,29 @@ impl Graph {
             println!(r"\begin{{minipage}}{{\textwidth}}");
             println!(r"Шаг {}\\", step + 1);
 
-            println!(r"Вершины:\\");
+            println!(r"\begin{{table}}[H]");
+            println!(r"\centering");
+            println!(r"\caption{{Граф на шаге {}}}", step + 1);
+            println!(r"\begin{{tabular}}{{r*{{{}}}{{|c}}}}", vertices.len());
             for i in 0..vertices.len() {
-                println!(r"\mbox{{${}$}},", paren_node_names[i]);
+                print!(r"&${}$", paren_node_names[i]);
             }
             println!(r"\\");
-            println!(r"\mbox{{$s={},t={}$}}\\", paren_node_names[s], paren_node_names[t]);
-
-            println!(r"Ребра:\\");
-            for &(e1, e2, w) in edges.iter() {
-                println!(
-                    r"\mbox{{$({};{})$ длины {}}},",
-                    paren_node_names[e1], paren_node_names[e2], w
-                );
+            for i in 0..vertices.len() {
+                print!(r"\hline ${}$", paren_node_names[i]);
+                for j in 0..vertices.len() {
+                    print!("&");
+                    for &(e1, e2, w) in edges.iter() {
+                        if (e1 == i && e2 == j) || (e1 == j && e2 == i) {
+                            print!("{}", w);
+                            break;
+                        }
+                    }
+                }
+                println!(r"\\");
             }
-            println!(r"\\");
+            println!(r"\end{{tabular}}");
+            println!(r"\end{{table}}");
 
             println!(r"Ребра сечения $K_{{{}}}$:\\", step + 1);
             for &(e1, e2, w) in edges.iter() {
@@ -425,5 +441,5 @@ fn main() {
     // }
     // println!();
 
-    variant.frank_frish(4, 5);
+    variant.frank_frish(0, 3);
 }
