@@ -39,6 +39,54 @@ impl Graph {
         }
     }
 
+    fn print_matrix(&self, mapper: fn(Option<u32>) -> String) {
+        for i in 0..self.node_count {
+            print!("&$e_{{{}}}$", i + 1);
+        }
+        println!(r"\\");
+        for i in 0..self.node_count {
+            print!("$e_{{{}}}$", i + 1);
+            for j in 0..self.node_count {
+                print!("&{}", mapper(self.edge_weights[i][j]));
+            }
+            println!(r"\\");
+        }
+    }
+
+    fn print_weight_matrix(&self) {
+        self.print_matrix(|o| match o {
+            Some(num) => format!("{}", num),
+            None => "".into(),
+        });
+    }
+
+    fn print_edge_matrix(&self) {
+        self.print_matrix(|o| if o.is_some() { "1" } else { "0" }.into());
+    }
+
+    fn print_graph(&self) {
+        for i in 0..self.node_count {
+            let phi = i as f64 / self.node_count as f64 * 2.0 * std::f64::consts::PI;
+            let r = 4.0;
+            let x = r * phi.sin();
+            let y = r * phi.cos();
+            println!(
+                r"\node[draw,circle] (e{}) at ({},{}) {{$e_{{{}}}$}};",
+                i,
+                x,
+                y,
+                i + 1
+            );
+        }
+        for i in 0..self.node_count {
+            for j in 0..self.node_count {
+                if i > j && self.edge_weights[i][j].is_some() {
+                    println!(r"\path (e{}) edge (e{});", i, j);
+                }
+            }
+        }
+    }
+
     fn color_sorted_nodes(&self) {
         let mut node_degrees: Vec<_> = self
             .edge_weights
@@ -412,34 +460,82 @@ impl Graph {
 
             println!(r"Слияние вершин:\\");
             for &(e1, e2) in to_collapse.iter() {
-                println!(
-                    r"\mbox{{$({},{})$}},",
-                    node_names[e1], node_names[e2]
-                );
+                println!(r"\mbox{{$({},{})$}},", node_names[e1], node_names[e2]);
             }
             println!(r"\end{{minipage}}");
         }
+    }
+
+    fn gamilton_recursion(
+        &self,
+        mut S: &mut Vec<usize>,
+        mut included: &mut Vec<bool>,
+        node: usize,
+    ) -> bool {
+        if !S.is_empty() {
+            print!(r"\textquotedbl Возможная\textquotedbl{{}} вершина $e_{{{}}}\in\Gamma e_{{{}}}$, $S=\{{", node + 1, S.last().unwrap() + 1);
+            for i in 0..S.len() {
+                print!("e_{{{}}},", S[i] + 1);
+            }
+            println!(r"e_{{{}}}\}}$\\", node + 1);
+        }
+        S.push(node);
+        included[node] = true;
+
+        if included.iter().all(|b| *b) {
+            if self.edge_weights[S[0]][node].is_some() {
+                return true;
+            } else {
+                println!(r"Ребра $(e_{{{}}};e_{{{}}})$ нет. Удалим вершину $e_{{{}}}$\\", node + 1, S[0] + 1, node + 1);
+                return false;
+            }
+        }
+
+        for i in (0..self.node_count) {
+            let i = (i + 2) % self.node_count;
+            if self.edge_weights[node][i].is_none() || included[i] {
+                continue;
+            }
+            if self.gamilton_recursion(&mut S, &mut included, i) {
+                return true;
+            }
+        }
+
+        println!(r"У $e_{{{}}}$ больше нет \textquotedbl возможных\textquotedbl{{}} вершин. Удалим её\\", node + 1);
+        included[node] = false;
+        S.pop().unwrap();
+        false
+    }
+
+    fn gamilton_cycle(&self) {
+        let mut S = Vec::new();
+        let mut included = vec![false; self.node_count];
+        println!(r"Включаем в S начальную вершину $S=\{{e_1\}}$\\");
+        self.gamilton_recursion(&mut S, &mut included, 0);
+        println!(r"Итоговый гамильтонов цикл: $S=\{{");
+        for i in 0..self.node_count {
+            if i != 0 {
+                print!(",");
+            }
+            print!("e_{{{}}}", S[i] + 1);
+        }
+        println!(r"\}}$\\");
+        println!();
+        self.print_graph();
+        println!();
+        for i in 0..self.node_count {
+            let j = (i + 1) % self.node_count;
+            println!(r"\path [line width=0.5mm] (e{}) edge (e{});", S[i], S[j]);
+        }
+        println!();
     }
 }
 
 fn main() {
     let variant = Graph::variant();
-    // for i in 0..variant.node_count {
-    //     print!("&$e_{{{}}}$", i + 1);
-    // }
-    // println!(r"\\");
-    // for i in 0..variant.node_count {
-    //     print!("$e_{{{}}}$", i + 1);
-    //     for j in 0..variant.node_count {
-    //         print!("&");
-    //         match variant.edge_weights[i][j] {
-    //             Some(num) => print!("{}", num),
-    //             _ => {}
-    //         }
-    //     }
-    //     println!(r"\\");
-    // }
+    // variant.print_edge_matrix();
     // println!();
-
-    variant.frank_frish(0, 3);
+    // variant.print_graph();
+    // println!();
+    variant.gamilton_cycle();
 }

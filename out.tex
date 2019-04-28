@@ -1,107 +1,80 @@
-\bigskip
-\noindent
-\begin{minipage}{\textwidth}
-Шаг 1\\
-\begin{table}[H]
-\centering
-\caption{Граф на шаге 1}
-\begin{tabular}{r*{12}{|c}}
-&$e_{1}$&$e_{2}$&$e_{3}$&$e_{4}$&$e_{5}$&$e_{6}$&$e_{7}$&$e_{8}$&$e_{9}$&$e_{10}$&$e_{11}$&$e_{12}$\\
-\hline $e_{1}$&&3&&2&&1&5&4&4&&&1\\
-\hline $e_{2}$&3&&3&2&&3&&4&&5&4&4\\
-\hline $e_{3}$&&3&&&&&2&&4&1&4&5\\
-\hline $e_{4}$&2&2&&&&&1&&&1&2&\\
-\hline $e_{5}$&&&&&&&&4&1&&&\\
-\hline $e_{6}$&1&3&&&&&&&&&&1\\
-\hline $e_{7}$&5&&2&1&&&&4&4&&&5\\
-\hline $e_{8}$&4&4&&&4&&4&&1&2&5&4\\
-\hline $e_{9}$&4&&4&&1&&4&1&&&5&\\
-\hline $e_{10}$&&5&1&1&&&&2&&&&\\
-\hline $e_{11}$&&4&4&2&&&&5&5&&&5\\
-\hline $e_{12}$&1&4&5&&&1&5&4&&&5&\\
-\end{tabular}
-\end{table}
-Ребра сечения $K_{1}$:\\
-\mbox{$(e_{1};e_{2})$ длины 3},
-\mbox{$(e_{1};e_{4})$ длины 2},
-\mbox{$(e_{1};e_{6})$ длины 1},
-\mbox{$(e_{1};e_{7})$ длины 5},
-\mbox{$(e_{1};e_{8})$ длины 4},
-\mbox{$(e_{1};e_{9})$ длины 4},
-\mbox{$(e_{1};e_{12})$ длины 1}\\
-$Q=5$\\
-Слияние вершин:\\
-\mbox{$(e_{1},e_{7})$},
-\mbox{$(e_{2},e_{10})$},
-\mbox{$(e_{3},e_{12})$},
-\mbox{$(e_{7},e_{12})$},
-\mbox{$(e_{8},e_{11})$},
-\mbox{$(e_{9},e_{11})$},
-\mbox{$(e_{11},e_{12})$},
-\end{minipage}
-\bigskip
-\noindent
-\begin{minipage}{\textwidth}
-Шаг 2\\
-\begin{table}[H]
-\centering
-\caption{Граф на шаге 2}
-\begin{tabular}{r*{5}{|c}}
-&$(e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12})$&$(e_{2},e_{10})$&$e_{4}$&$e_{5}$&$e_{6}$\\
-\hline $(e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12})$&&4&2&4&1\\
-\hline $(e_{2},e_{10})$&4&&2&&3\\
-\hline $e_{4}$&2&2&&&\\
-\hline $e_{5}$&4&&&&\\
-\hline $e_{6}$&1&3&&&\\
-\end{tabular}
-\end{table}
-Ребра сечения $K_{2}$:\\
-\mbox{$((e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12});e_{6})$ длины 1},
-\mbox{$((e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12});e_{5})$ длины 4},
-\mbox{$((e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12});e_{4})$ длины 2},
-\mbox{$((e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12});(e_{2},e_{10}))$ длины 4}\\
-$Q=4$\\
-Слияние вершин:\\
-\mbox{$(e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12},e_{2},e_{10})$},
-\mbox{$(e_{1},e_{3},e_{7},e_{8},e_{9},e_{11},e_{12},e_{5})$},
-\end{minipage}
-\bigskip
-\noindent
-\begin{minipage}{\textwidth}
-Шаг 3\\
-\begin{table}[H]
-\centering
-\caption{Граф на шаге 3}
-\begin{tabular}{r*{3}{|c}}
-&$(e_{1},e_{2},e_{3},e_{5},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12})$&$e_{4}$&$e_{6}$\\
-\hline $(e_{1},e_{2},e_{3},e_{5},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12})$&&2&3\\
-\hline $e_{4}$&2&&\\
-\hline $e_{6}$&3&&\\
-\end{tabular}
-\end{table}
-Ребра сечения $K_{3}$:\\
-\mbox{$((e_{1},e_{2},e_{3},e_{5},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12});e_{6})$ длины 3},
-\mbox{$((e_{1},e_{2},e_{3},e_{5},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12});e_{4})$ длины 2}\\
-$Q=3$\\
-Слияние вершин:\\
-\mbox{$(e_{1},e_{2},e_{3},e_{5},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12},e_{6})$},
-\end{minipage}
-\bigskip
-\noindent
-\begin{minipage}{\textwidth}
-Шаг 4\\
-\begin{table}[H]
-\centering
-\caption{Граф на шаге 4}
-\begin{tabular}{r*{2}{|c}}
-&$(e_{1},e_{2},e_{3},e_{5},e_{6},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12})$&$e_{4}$\\
-\hline $(e_{1},e_{2},e_{3},e_{5},e_{6},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12})$&&2\\
-\hline $e_{4}$&2&\\
-\end{tabular}
-\end{table}
-Ребра сечения $K_{4}$:\\
-\mbox{$((e_{1},e_{2},e_{3},e_{5},e_{6},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12});e_{4})$ длины 2}\\
-$Q=2$\\
-Слияние вершин:\\
-\mbox{$(e_{1},e_{2},e_{3},e_{5},e_{6},e_{7},e_{8},e_{9},e_{10},e_{11},e_{12},e_{4})$},
-\end{minipage}
+Включаем в S начальную вершину $S=\{e_1\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{4}\in\Gamma e_{1}$, $S=\{e_{1},e_{4}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{7}\in\Gamma e_{4}$, $S=\{e_{1},e_{4},e_{7}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{3}\in\Gamma e_{7}$, $S=\{e_{1},e_{4},e_{7},e_{3}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{9}\in\Gamma e_{3}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{5}\in\Gamma e_{9}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{8}\in\Gamma e_{5}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{10}\in\Gamma e_{8}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{2}\in\Gamma e_{10}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10},e_{2}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{6}\in\Gamma e_{2}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10},e_{2},e_{6}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{12}\in\Gamma e_{6}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10},e_{2},e_{6},e_{12}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{11}\in\Gamma e_{12}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10},e_{2},e_{6},e_{12},e_{11}\}$\\
+Ребра $(e_{11};e_{1})$ нет. Удалим вершину $e_{11}$\\
+У $e_{12}$ больше нет \textquotedbl возможных\textquotedbl{} вершин. Удалим её\\
+У $e_{6}$ больше нет \textquotedbl возможных\textquotedbl{} вершин. Удалим её\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{12}\in\Gamma e_{6}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10},e_{2},e_{6},e_{12}\}$\\
+\textquotedbl Возможная\textquotedbl{} вершина $e_{6}\in\Gamma e_{12}$, $S=\{e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10},e_{2},e_{6},e_{12},e_{6}\}$\\
+Итоговый гамильтонов цикл: $S=\{
+e_{1},e_{4},e_{7},e_{3},e_{9},e_{5},e_{8},e_{10},e_{2},e_{6},e_{12},e_{6}\}$\\
+
+\node[draw,circle] (e0) at (0,4) {$e_{1}$};
+\node[draw,circle] (e1) at (1.9999999999999998,3.464101615137755) {$e_{2}$};
+\node[draw,circle] (e2) at (3.4641016151377544,2.0000000000000004) {$e_{3}$};
+\node[draw,circle] (e3) at (4,0.00000000000000024492935982947064) {$e_{4}$};
+\node[draw,circle] (e4) at (3.464101615137755,-1.9999999999999991) {$e_{5}$};
+\node[draw,circle] (e5) at (1.9999999999999998,-3.464101615137755) {$e_{6}$};
+\node[draw,circle] (e6) at (0.0000000000000004898587196589413,-4) {$e_{7}$};
+\node[draw,circle] (e7) at (-2.0000000000000004,-3.4641016151377544) {$e_{8}$};
+\node[draw,circle] (e8) at (-3.4641016151377535,-2.0000000000000018) {$e_{9}$};
+\node[draw,circle] (e9) at (-4,-0.0000000000000007347880794884119) {$e_{10}$};
+\node[draw,circle] (e10) at (-3.4641016151377544,2.0000000000000004) {$e_{11}$};
+\node[draw,circle] (e11) at (-2.0000000000000018,3.4641016151377535) {$e_{12}$};
+\path (e1) edge (e0);
+\path (e2) edge (e1);
+\path (e3) edge (e0);
+\path (e3) edge (e1);
+\path (e5) edge (e0);
+\path (e5) edge (e1);
+\path (e6) edge (e0);
+\path (e6) edge (e2);
+\path (e6) edge (e3);
+\path (e7) edge (e0);
+\path (e7) edge (e1);
+\path (e7) edge (e4);
+\path (e7) edge (e6);
+\path (e8) edge (e0);
+\path (e8) edge (e2);
+\path (e8) edge (e4);
+\path (e8) edge (e6);
+\path (e8) edge (e7);
+\path (e9) edge (e1);
+\path (e9) edge (e2);
+\path (e9) edge (e3);
+\path (e9) edge (e7);
+\path (e10) edge (e1);
+\path (e10) edge (e2);
+\path (e10) edge (e3);
+\path (e10) edge (e7);
+\path (e10) edge (e8);
+\path (e11) edge (e0);
+\path (e11) edge (e1);
+\path (e11) edge (e2);
+\path (e11) edge (e5);
+\path (e11) edge (e6);
+\path (e11) edge (e7);
+\path (e11) edge (e10);
+
+\path [line width=0.5mm] (e0) edge (e3);
+\path [line width=0.5mm] (e3) edge (e6);
+\path [line width=0.5mm] (e6) edge (e2);
+\path [line width=0.5mm] (e2) edge (e8);
+\path [line width=0.5mm] (e8) edge (e4);
+\path [line width=0.5mm] (e4) edge (e7);
+\path [line width=0.5mm] (e7) edge (e9);
+\path [line width=0.5mm] (e9) edge (e1);
+\path [line width=0.5mm] (e1) edge (e5);
+\path [line width=0.5mm] (e5) edge (e11);
+\path [line width=0.5mm] (e11) edge (e5);
+\path [line width=0.5mm] (e5) edge (e0);
+
