@@ -9,13 +9,6 @@ struct Graph {
 }
 
 impl Graph {
-    fn new() -> Self {
-        Graph {
-            node_count: 0,
-            edge_weights: vec![vec![]],
-        }
-    }
-
     fn variant() -> Self {
         Graph {
             node_count: 12,
@@ -39,13 +32,44 @@ impl Graph {
         }
     }
 
-    fn print_matrix(&self, mapper: fn(Option<u32>) -> String) {
+    fn standard_naming(i: usize) -> String {
+        format!("e_{{{}}}", i + 1)
+    }
+
+    fn mapper_weight(weight: Option<u32>) -> String {
+        match weight {
+            Some(num) => format!("{}", num),
+            None => "".into(),
+        }
+    }
+
+    fn mapper_existence(weight: Option<u32>) -> String {
+        match weight {
+            Some(_) => "1",
+            None => "0",
+        }
+        .into()
+    }
+
+    fn mapper_space(weight: Option<u32>) -> String {
+        match weight {
+            Some(_) => "1",
+            None => "",
+        }
+        .into()
+    }
+
+    fn print_matrix(
+        &self,
+        naming: impl Fn(usize) -> String,
+        mapper: impl Fn(Option<u32>) -> String,
+    ) {
         for i in 0..self.node_count {
-            print!("&$e_{{{}}}$", i + 1);
+            print!("&${}$", naming(i));
         }
         println!(r"\\");
         for i in 0..self.node_count {
-            print!("$e_{{{}}}$", i + 1);
+            print!("${}$", naming(i));
             for j in 0..self.node_count {
                 print!("&{}", mapper(self.edge_weights[i][j]));
             }
@@ -53,35 +77,48 @@ impl Graph {
         }
     }
 
-    fn print_weight_matrix(&self) {
-        self.print_matrix(|o| match o {
-            Some(num) => format!("{}", num),
-            None => "".into(),
-        });
+    fn print_triangle_matrix(
+        &self,
+        naming: impl Fn(usize) -> String,
+        mapper: impl Fn(Option<u32>) -> String,
+    ) {
+        for i in 0..self.node_count {
+            print!("&${}$", naming(i));
+        }
+        println!(r"\\");
+        for i in 0..self.node_count {
+            print!("${}$", naming(i));
+            for j in 0..self.node_count {
+                print!("&");
+                if i < j {
+                    print!("{}", mapper(self.edge_weights[i][j]));
+                }
+            }
+            println!(r"\\");
+        }
     }
 
-    fn print_edge_matrix(&self) {
-        self.print_matrix(|o| if o.is_some() { "1" } else { "0" }.into());
-    }
-
-    fn print_graph(&self) {
+    fn print_node_circle(&self, naming: impl Fn(usize) -> String) {
         for i in 0..self.node_count {
             let phi = i as f64 / self.node_count as f64 * 2.0 * std::f64::consts::PI;
             let r = 4.0;
             let x = r * phi.sin();
             let y = r * phi.cos();
             println!(
-                r"\node[draw,circle] (e{}) at ({},{}) {{$e_{{{}}}$}};",
+                r"\node[draw,circle] (x{}) at ({},{}) {{${}$}};",
                 i,
                 x,
                 y,
-                i + 1
+                naming(i)
             );
         }
+    }
+
+    fn print_edges(&self) {
         for i in 0..self.node_count {
             for j in 0..self.node_count {
-                if i > j && self.edge_weights[i][j].is_some() {
-                    println!(r"\path (e{}) edge (e{});", i, j);
+                if i < j && self.edge_weights[i][j].is_some() {
+                    println!(r"\path (x{}) edge (x{});", i, j);
                 }
             }
         }
@@ -110,7 +147,7 @@ impl Graph {
                 if node_colors[nii].is_some() {
                     continue;
                 }
-                print!("&$e_{{{}}}$", nii + 1);
+                print!("&${}$", Self::standard_naming(i));
             }
             println!(r"&$r_i$\\");
 
@@ -119,14 +156,14 @@ impl Graph {
                 if node_colors[nii].is_some() {
                     continue;
                 }
-                print!("$e_{{{}}}$", nii + 1);
+                print!("${}$", Self::standard_naming(nii));
                 for j in 0..self.node_count {
                     let nij = node_degrees[j].0;
                     if node_colors[nij].is_some() {
                         continue;
                     }
                     print!("&");
-                    if j >= i {
+                    if i <= j {
                         print!(
                             "{}",
                             if i != j && self.edge_weights[nii][nij].is_some() {
@@ -153,7 +190,7 @@ impl Graph {
                 }
                 if can_paint {
                     node_colors[nii] = Some(color);
-                    print!("$e_{{{}}}$;", nii + 1);
+                    print!("${}$;", Self::standard_naming(nii));
                 }
             }
             println!(r"\\");
@@ -162,7 +199,11 @@ impl Graph {
         println!();
         println!(r"Node&Color\\");
         for i in 0..self.node_count {
-            println!(r"$e_{{{}}}$&{}\\", i + 1, node_colors[i].unwrap() + 1);
+            println!(
+                r"${}$&{}\\",
+                Self::standard_naming(i),
+                node_colors[i].unwrap() + 1
+            );
         }
     }
 
@@ -208,7 +249,7 @@ impl Graph {
                         None => shortest_path[i] = Some((p.1 + weight, p.0, false)),
                         _ => {}
                     },
-                    _ => {}
+                    None => {}
                 }
             }
         }
@@ -219,7 +260,7 @@ impl Graph {
         println!(r"\\");
 
         for node in 0..self.node_count {
-            print!("$e_{{{}}}$", node + 1);
+            print!("${}$", Graph::standard_naming(node));
             for step in 0..log.len() {
                 match log[step][node] {
                     Some((length, _, true)) => match log[step - 1][node] {
@@ -237,9 +278,9 @@ impl Graph {
         for node in 0..self.node_count {
             let (dist, from, _) = shortest_path[node].unwrap();
             println!(
-                r"$e_{{{}}}$&$e_{{{}}}$&{}&{}\\",
-                node + 1,
-                from + 1,
+                r"${}$&${}$&{}&{}\\",
+                Self::standard_naming(node),
+                Self::standard_naming(from),
                 self.edge_weights[node][from].unwrap(),
                 dist
             );
@@ -258,12 +299,12 @@ impl Graph {
         print!("$");
         for i in 1..path.len() {
             print!(
-                r"e_{{{}}}\xrightarrow[{}]{{}} ",
-                path[i - 1] + 1,
+                r"{}\xrightarrow[{}]{{}} ",
+                Self::standard_naming(path[i - 1]),
                 self.edge_weights[path[i - 1]][path[i]].unwrap()
             );
         }
-        println!("e_{{{}}}$", finish + 1);
+        println!("{}$", Self::standard_naming(finish));
     }
 
     fn frank_frish(&self, start: usize, finish: usize) {
@@ -277,7 +318,7 @@ impl Graph {
 
                 match self.edge_weights[i][j] {
                     Some(w) => collapsed_edges.push((i, j, w)),
-                    _ => {}
+                    None => {}
                 }
             }
         }
@@ -295,7 +336,7 @@ impl Graph {
                 .max();
             let Q = match Q {
                 Some(num) => num,
-                _ => break,
+                None => break,
             };
             let mut to_collapse = Vec::new();
             for &(i, j, w) in &collapsed_edges {
@@ -399,7 +440,7 @@ impl Graph {
                 .iter()
                 .map(|v| {
                     v.iter()
-                        .map(|&i| format!("e_{{{}}}", i + 1))
+                        .map(|&i| format!("{}", Self::standard_naming(i)))
                         .fold("".into(), |a, b| format!("{},{}", a, b))
                         .chars()
                         .skip(1)
@@ -469,24 +510,51 @@ impl Graph {
     fn gamilton_recursion(
         &self,
         mut S: &mut Vec<usize>,
-        mut included: &mut Vec<bool>,
+        mut included: &mut [bool],
         node: usize,
     ) -> bool {
-        if !S.is_empty() {
-            print!(r"\textquotedbl Возможная\textquotedbl{{}} вершина $e_{{{}}}\in\Gamma e_{{{}}}$, $S=\{{", node + 1, S.last().unwrap() + 1);
-            for i in 0..S.len() {
-                print!("e_{{{}}},", S[i] + 1);
-            }
-            println!(r"e_{{{}}}\}}$\\", node + 1);
-        }
         S.push(node);
         included[node] = true;
+        if !S.is_empty() {
+            println!(r"\textquotedbl Возможная\textquotedbl{{}} вершина");
+            print!(
+                r"${}\in\Gamma {}$, $S=\{{",
+                Self::standard_naming(node),
+                Self::standard_naming(*S.last().unwrap())
+            );
+            for i in 0..S.len() - 1 {
+                print!("{},", Self::standard_naming(S[i]));
+            }
+            println!(r"{}\}}$\\", Self::standard_naming(node));
+        }
 
+        let result = self.gamilton_recursion_unwrapped(&mut S, &mut included, node);
+        if !result {
+            included[node] = false;
+            S.pop().unwrap();
+            println!(
+                r"Удалим вершину ${}$\\",
+                Self::standard_naming(node)
+            );
+        }
+        result
+    }
+
+    fn gamilton_recursion_unwrapped(
+        &self,
+        mut S: &mut Vec<usize>,
+        mut included: &mut [bool],
+        node: usize,
+    ) -> bool {
         if included.iter().all(|b| *b) {
             if self.edge_weights[S[0]][node].is_some() {
                 return true;
             } else {
-                println!(r"Ребра $(e_{{{}}};e_{{{}}})$ нет. Удалим вершину $e_{{{}}}$\\", node + 1, S[0] + 1, node + 1);
+                print!(
+                    "Ребра $({};{})$ нет. ",
+                    Self::standard_naming(node),
+                    Self::standard_naming(S[0])
+                );
                 return false;
             }
         }
@@ -501,41 +569,386 @@ impl Graph {
             }
         }
 
-        println!(r"У $e_{{{}}}$ больше нет \textquotedbl возможных\textquotedbl{{}} вершин. Удалим её\\", node + 1);
-        included[node] = false;
-        S.pop().unwrap();
+        print!(
+            r"У ${}$ больше нет \textquotedbl возможных\textquotedbl{{}} вершин. ",
+            Self::standard_naming(node)
+        );
         false
+    }
+
+    fn plane_families(
+        mut full: &mut Vec<Vec<usize>>,
+        mut stack: &mut Vec<usize>,
+        bitmasks: &[u32],
+        M: u32,
+        iter: usize,
+    ) {
+        stack.push(iter - 1);
+        Self::plane_families_unwrapped(&mut full, &mut stack, bitmasks, M, iter);
+        stack.pop().unwrap();
+    }
+
+    fn plane_families_unwrapped(
+        mut full: &mut Vec<Vec<usize>>,
+        mut stack: &mut Vec<usize>,
+        bitmasks: &[u32],
+        M: u32,
+        iter: usize,
+    ) {
+        for i in 0..stack.len() {
+            if i != 0 {
+                print!(", ");
+            }
+            print!("{}", stack[i]);
+        }
+        print!(r"&\texttt{{");
+
+        for i in 0..bitmasks.len() {
+            print!("{}", (M >> i) & 1);
+        }
+        print!(r"}}&");
+
+        let unset_bits: Vec<_> = (0..bitmasks.len())
+            .filter(|i| ((M >> i) & 1) == 0)
+            .collect();
+
+        for i in 0..unset_bits.len() {
+            if i != 0 {
+                print!(", ");
+            }
+            print!("{}", unset_bits[i] + 1);
+        }
+        println!(r"\\");
+
+        for &i in &unset_bits {
+            if i < iter {
+                continue;
+            }
+            Self::plane_families(&mut full, &mut stack, bitmasks, M | bitmasks[i], i + 1);
+        }
+
+        if unset_bits.is_empty() {
+            full.push(stack.clone());
+        }
+    }
+
+    fn intersection_matrix(psi: &Vec<Vec<usize>>) -> Vec<Vec<usize>> {
+        let mut result = Vec::new();
+        for i in 0..psi.len() {
+            let mut to_push = Vec::new();
+            for j in 0..psi.len() {
+                let mut it1 = 0;
+                let mut it2 = 0;
+                let mut diff = 0;
+                while it1 < psi[i].len() && it2 < psi[j].len() {
+                    diff += 1;
+                    let val1 = psi[i][it1];
+                    let val2 = psi[j][it2];
+                    if val1 <= val2 {
+                        it1 += 1;
+                    }
+                    if val2 <= val1 {
+                        it2 += 1;
+                    }
+                }
+                while it1 < psi[i].len() {
+                    diff += 1;
+                    it1 += 1;
+                }
+                while it2 < psi[j].len() {
+                    diff += 1;
+                    it2 += 1;
+                }
+                to_push.push(diff);
+            }
+            result.push(to_push);
+        }
+        result
     }
 
     fn gamilton_cycle(&self) {
         let mut S = Vec::new();
-        let mut included = vec![false; self.node_count];
         println!(r"Включаем в S начальную вершину $S=\{{e_1\}}$\\");
-        self.gamilton_recursion(&mut S, &mut included, 0);
-        println!(r"Итоговый гамильтонов цикл: $S=\{{");
+        self.gamilton_recursion(&mut S, &mut vec![false; self.node_count], 0);
+
+        print!(r"Итоговый гамильтонов цикл: $S=\{{");
         for i in 0..self.node_count {
             if i != 0 {
                 print!(",");
             }
-            print!("e_{{{}}}", S[i] + 1);
+            print!("{}", Self::standard_naming(S[i]));
         }
         println!(r"\}}$\\");
         println!();
-        self.print_graph();
+
+        self.print_node_circle(Self::standard_naming);
         println!();
         for i in 0..self.node_count {
             let j = (i + 1) % self.node_count;
-            println!(r"\path [line width=0.5mm] (e{}) edge (e{});", S[i], S[j]);
+            println!(r"\path (x{}) edge (x{});", S[i], S[j]);
         }
         println!();
+
+        let mut new_index = vec![0; self.node_count];
+        for i in 0..self.node_count {
+            new_index[S[i]] = i;
+        }
+
+        print!("до перенумерации");
+        for i in 0..self.node_count {
+            print!("&${}$", Self::standard_naming(i));
+        }
+        println!(r"\\");
+        print!("после перенумерации");
+        for i in 0..self.node_count {
+            print!("&${}$", Self::standard_naming(new_index[i]));
+        }
+        println!();
+        println!();
+
+        let mut renumbered = Graph {
+            node_count: self.node_count,
+            edge_weights: vec![vec![None; self.node_count]; self.node_count],
+        };
+
+        for i in 0..self.node_count {
+            for j in 0..self.node_count {
+                renumbered.edge_weights[i][j] = self.edge_weights[S[i]][S[j]];
+            }
+        }
+
+        for i in 0..self.node_count {
+            print!("&${}$", Self::standard_naming(i));
+        }
+        println!(r"\\");
+
+        for i in 0..self.node_count {
+            print!("${}$", Self::standard_naming(i));
+            for j in 0..self.node_count {
+                match j {
+                    j if j < i => print!("&"),
+                    j if j == i => print!("&0"),
+                    j if j == i + 1 => print!(r"&$\times$"),
+                    j => match renumbered.edge_weights[i][j] {
+                        Some(_) => print!("&1"),
+                        None => print!("&"),
+                    },
+                }
+            }
+            println!(r"\\");
+        }
+
+        println!();
+        renumbered.print_node_circle(Self::standard_naming);
+        println!();
+        renumbered.print_edges();
+        println!();
+
+        let mut edges = Vec::new();
+        for i in 0..self.node_count {
+            for j in 0..self.node_count {
+                if j <= i + 1 {
+                    continue;
+                }
+
+                if (j + 1) % self.node_count <= i {
+                    continue;
+                }
+
+//                if j <= i + 2 {
+//                    continue;
+//                }
+//
+//                if (j + 2) % self.node_count <= i {
+//                    continue;
+//                }
+
+                if renumbered.edge_weights[i][j].is_some() {
+                    edges.push((i, j));
+                }
+            }
+        }
+
+        let edges = &edges[..15];
+
+        let mut intersection_graph = Graph {
+            node_count: edges.len(),
+            edge_weights: vec![vec![None; edges.len()]; edges.len()],
+        };
+
+        for i in 0..edges.len() {
+            for j in 0..edges.len() {
+                let (a, b) = edges[i];
+                let (c, d) = edges[j];
+                if i == j || (a < c && c < b && b < d) {
+                    intersection_graph.edge_weights[i][j] = Some(0);
+                    intersection_graph.edge_weights[j][i] = Some(0);
+                }
+            }
+        }
+
+        for i in 0..edges.len() {
+            print!(r"&$u_{{{},{}}}$", edges[i].0 + 1, edges[i].1 + 1);
+        }
+        println!(r"\\");
+        for i in 0..edges.len() {
+            print!(r"&{}", i + 1);
+        }
+        println!(r"\\");
+        println!();
+
+        intersection_graph.print_matrix(|i| format!("{}", i + 1), Self::mapper_space);
+        println!();
+
+        let mut stack = Vec::new();
+        let bitmasks: Vec<_> = (0..edges.len())
+            .map(|i| {
+                (0..edges.len())
+                    .filter_map(|j| intersection_graph.edge_weights[i][j].map(|_| (1 << j)))
+                    .fold(0, |a, b| a | b)
+            })
+            .collect();
+        let mut psi = Vec::new();
+        Self::plane_families_unwrapped(&mut psi, &mut stack, bitmasks.as_slice(), 0, 0);
+        let mut edge_used = vec![false; edges.len()];
+
+        println!();
+        for i in 0..psi.len() {
+            print!(r"$\psi_{{{}}}=\{{", i + 1);
+            for j in 0..psi[i].len() {
+                if j != 0 {
+                    print!(",");
+                }
+                print!(
+                    r"u_{{{},{}}}",
+                    edges[psi[i][j]].0 + 1,
+                    edges[psi[i][j]].1 + 1
+                );
+                //                print!(r"r_{{{}}}", psi[i][j] + 1);
+            }
+            println!(r"\}}$\\");
+        }
+
+        let diff_mat = Self::intersection_matrix(&psi);
+        println!();
+
+        let mut alpha_max = 0;
+        let mut maximal_pairs = Vec::new();
+
+        for i in 0..psi.len() {
+            print!("&{}", i + 1);
+        }
+        println!(r"\\");
+        for i in 0..psi.len() {
+            print!("{}", i + 1);
+            for j in 0..psi.len() {
+                if j < i {
+                    print!("&");
+                } else if j == i {
+                    print!(r"&$\times$");
+                } else {
+                    if diff_mat[i][j] > alpha_max {
+                        alpha_max = diff_mat[i][j];
+                        maximal_pairs.clear();
+                    }
+                    if diff_mat[i][j] == alpha_max {
+                        maximal_pairs.push((i, j));
+                    }
+                    print!("&{}", diff_mat[i][j]);
+                }
+            }
+            println!(r"\\");
+        }
+
+        println!();
+        print!(r"$max \alpha_{{\gamma\delta}}");
+        for (i, j) in &maximal_pairs {
+            print!(r"=\alpha_{{{},{}}}", i + 1, j + 1)
+        }
+        println!(r"={}$\\", alpha_max);
+        println!("Возьмем ");
+        for psi_id in &[maximal_pairs[0].0, maximal_pairs[0].1] {
+            let psi_id = *psi_id;
+            print!(r"$\psi_{{{}}}=\{{", psi_id + 1);
+            for i in 0..psi[psi_id].len() {
+                if i != 0 {
+                    print!(",");
+                }
+                print!(
+                    "u_{{{},{}}}",
+                    edges[psi[psi_id][i]].0 + 1,
+                    edges[psi[psi_id][i]].1 + 1
+                );
+            }
+            println!(r"\}}$");
+        }
+
+        println!();
+        renumbered.print_node_circle(Self::standard_naming);
+        println!();
+        for i in 0..self.node_count {
+            println!(r"\path (x{}) edge (x{});", i, (i + 1) % self.node_count);
+        }
+        println!();
+        for &i in &psi[maximal_pairs[0].0] {
+            edge_used[i] = true;
+            println!(r"\path (x{}) edge (x{});", edges[i].0, edges[i].1);
+        }
+        println!();
+        for &i in &psi[maximal_pairs[0].1] {
+            edge_used[i] = true;
+            let (a, b) = edges[i];
+            let mut dist = 0;
+            let mut mp1 = 0.0;
+            let mut mp2 = 0.0;
+            for i in 0..(self.node_count / 2 + 1) {
+                if (a + i) % self.node_count == b {
+                    dist = i - 1;
+                    mp1 = a as f64 + i as f64 * 1.0 / 3.0;
+                    mp2 = a as f64 + i as f64 * 2.0 / 3.0;
+                    break;
+                } else if (b + i) % self.node_count == a {
+                    dist = i - 1;
+                    mp1 = b as f64 + i as f64 * 2.0 / 3.0;
+                    mp2 = b as f64 + i as f64 * 1.0 / 3.0;
+                    break;
+                }
+            }
+
+            let phi1 = 2.0 * std::f64::consts::PI * mp1 / self.node_count as f64;
+            let phi2 = 2.0 * std::f64::consts::PI * mp2 / self.node_count as f64;
+
+            println!(
+                r"\draw (x{0}) .. controls ({2},{3}) and ({4},{5}) .. (x{1});",
+                a,
+                b,
+                (4.5 + 0.25 * (dist * dist) as f64) * phi1.sin(),
+                (4.5 + 0.25 * (dist * dist) as f64) * phi1.cos(),
+                (4.5 + 0.25 * (dist * dist) as f64) * phi2.sin(),
+                (4.5 + 0.25 * (dist * dist) as f64) * phi2.cos(),
+            );
+        }
+
+        println!();
+        for i in 0..psi.len() {
+            let filtered: Vec<_> = psi[i].iter().filter(|&&j| !edge_used[j]).collect();
+            if !filtered.is_empty() {
+                print!(r"$\psi_{{{}}}=\{{", i + 1);
+                for i in 0..filtered.len() {
+                    if i != 0 {
+                        print!(",");
+                    }
+                    print!("u_{{{},{}}}", edges[i].0 + 1, edges[i].1 + 1);
+                }
+                println!(r"\}}$\\");
+            }
+        }
     }
 }
 
 fn main() {
     let variant = Graph::variant();
-    // variant.print_edge_matrix();
-    // println!();
-    // variant.print_graph();
-    // println!();
+    //    variant.print_node_circle(Graph::standard_naming);
+    //    variant.print_edges();
     variant.gamilton_cycle();
 }
