@@ -599,7 +599,7 @@ impl Graph {
             if i != 0 {
                 print!(", ");
             }
-            print!("{}", stack[i]);
+            print!("{}", stack[i] + 1);
         }
         print!(r"&\texttt{{");
 
