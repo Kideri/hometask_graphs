@@ -755,13 +755,13 @@ impl Graph {
                     continue;
                 }
 
-//                if j <= i + 2 {
-//                    continue;
-//                }
-//
-//                if (j + 2) % self.node_count <= i {
-//                    continue;
-//                }
+                //                if j <= i + 2 {
+                //                    continue;
+                //                }
+                //
+                //                if (j + 2) % self.node_count <= i {
+                //                    continue;
+                //                }
 
                 if renumbered.edge_weights[i][j].is_some() {
                     edges.push((i, j));
@@ -944,11 +944,108 @@ impl Graph {
             }
         }
     }
+
+    fn isomorphism(&self) {
+        let node_power: Vec<_> = (0..self.node_count)
+            .map(|i| {
+                self.edge_weights[i]
+                    .iter()
+                    .filter_map(|&o| match o {
+                        Some(val) if val != 0 => Some(val),
+                        _ => None,
+                    })
+                    .count()
+            })
+            .collect();
+        let mut other_match: Vec<_> = (0..self.node_count).collect();
+        other_match.sort_by(|&a, &b| node_power[a].cmp(&node_power[b]));
+
+        let mut other_graph = Graph {
+            node_count: self.node_count,
+            edge_weights: vec![vec![None; self.node_count]; self.node_count],
+        };
+
+        for i in 0..self.node_count {
+            for j in 0..self.node_count {
+                other_graph.edge_weights[i][j] = self.edge_weights[other_match[i]][other_match[j]];
+            }
+        }
+        let other_graph = other_graph;
+
+        println!("Исходный граф ($X$)");
+        self.print_matrix(Self::standard_naming, Self::mapper_weight);
+        println!();
+
+        println!("Перенумерованный граф ($Y$)");
+        other_graph.print_matrix(Self::standard_naming, Self::mapper_weight);
+        println!();
+
+        println!("Исходный граф ($X$)");
+        println!(r"\begin{{tikzpicture}}");
+        self.print_node_circle(Self::standard_naming);
+        self.print_edges();
+        println!(r"\end{{tikzpicture}}");
+        println!();
+
+        println!("Перенумерованный граф ($Y$)");
+        println!(r"\begin{{tikzpicture}}");
+        other_graph.print_node_circle(Self::standard_naming);
+        other_graph.print_edges();
+        println!(r"\end{{tikzpicture}}");
+        println!();
+
+        println!("Классы по степеням");
+        let &maximal_power = node_power.iter().max().unwrap();
+        print!(r"$\rho$");
+        for i in 0..(maximal_power + 1) {
+            print!("&{}", i);
+        }
+        println!(r"\\");
+        print!(r"\hline$X$");
+        for i in 0..(maximal_power + 1) {
+            let filtered: Vec<_> = (0..self.node_count)
+                .filter(|&j| self.edge_weights[j].iter()
+                    .filter_map(|&o| match o {
+                        Some(val) if val != 0 => Some(val),
+                        _ => None
+                    }).count() == i).collect();
+            print!("&$");
+            for j in 0..filtered.len() {
+                if j != 0 {
+                    print!(",");
+                }
+                print!("{}", Self::standard_naming(filtered[j]));
+            }
+
+            print!("$");
+        }
+        println!(r"\\");
+        print!(r"\hline$Y$");
+        for i in 0..(maximal_power + 1) {
+            let filtered: Vec<_> = (0..self.node_count)
+                .filter(|&j| other_graph.edge_weights[j].iter()
+                    .filter_map(|&o| match o {
+                        Some(val) if val != 0 => Some(val),
+                        _ => None
+                    }).count() == i).collect();
+            print!("&$");
+            for j in 0..filtered.len() {
+                if j != 0 {
+                    print!(",");
+                }
+                print!("{}", Self::standard_naming(filtered[j]));
+            }
+
+            print!("$");
+        }
+        println!(r"\\");
+        println!();
+    }
 }
 
 fn main() {
     let variant = Graph::variant();
     //    variant.print_node_circle(Graph::standard_naming);
     //    variant.print_edges();
-    variant.gamilton_cycle();
+    variant.isomorphism();
 }
