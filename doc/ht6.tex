@@ -1,0 +1,65 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[russian]{babel}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{longtable}
+
+\begin{document}
+    \pagestyle{fancy}
+    \fancyhead[L]{Вариант 182}
+    \fancyhead[R]{Лист {\thepage} из~\pageref{LastPage}}
+    \fancyfoot{}
+
+    \noindent
+    Домашняя работа по дискретной математике \\
+    <<Эйлеров цикл>> \\
+    Студент: Суркис Антон Игоревич \\
+    Группа: P3113
+
+    \begin{tikzpicture}
+        \node[draw,circle] (x0) at (0,4) {$x_{1}$};
+        \node[draw,circle] (x1) at (1.9999999999999998,3.464101615137755) {$x_{2}$};
+        \node[draw,circle] (x2) at (3.4641016151377544,2.0000000000000004) {$x_{3}$};
+        \node[draw,circle] (x3) at (4,0.00000000000000024492935982947064) {$x_{4}$};
+        \node[draw,circle] (x4) at (3.464101615137755,-1.9999999999999991) {$x_{5}$};
+        \node[draw,circle] (x5) at (1.9999999999999998,-3.464101615137755) {$x_{6}$};
+        \node[draw,circle] (x6) at (0.0000000000000004898587196589413,-4) {$x_{7}$};
+        \node[draw,circle] (x7) at (-2.0000000000000004,-3.4641016151377544) {$x_{8}$};
+        \node[draw,circle] (x8) at (-3.4641016151377535,-2.0000000000000018) {$x_{9}$};
+        \node[draw,circle] (x9) at (-4,-0.0000000000000007347880794884119) {$x_{10}$};
+        \node[draw,circle] (x10) at (-3.4641016151377544,2.0000000000000004) {$x_{11}$};
+        \node[draw,circle] (x11) at (-2.0000000000000018,3.4641016151377535) {$x_{12}$};
+
+        \draw[->,-latex] (x0) -- (x1);
+        \draw[->,-latex] (x1) -- (x2);
+        \draw[->,-latex] (x2) -- (x3);
+        \draw[->,-latex] (x3) -- (x4);
+        \draw[->,-latex] (x4) -- (x5);
+        \draw[->,-latex] (x5) -- (x6);
+        \draw[->,-latex] (x6) -- (x7);
+        \draw[->,-latex] (x7) -- (x8);
+        \draw[->,-latex] (x8) -- (x9);
+        \draw[->,-latex] (x9) -- (x10);
+        \draw[->,-latex] (x10) -- (x11);
+        \draw[->,-latex] (x11) -- (x0);
+
+        \draw[->,-latex] (x0) -- (x5);
+        \draw[->,-latex] (x1) -- (x6);
+        \draw[->,-latex] (x2) -- (x7);
+        \draw[->,-latex] (x3) -- (x8);
+        \draw[->,-latex] (x4) -- (x9);
+        \draw[->,-latex] (x5) -- (x10);
+        \draw[->,-latex] (x6) -- (x11);
+        \draw[->,-latex] (x7) -- (x0);
+        \draw[->,-latex] (x8) -- (x1);
+        \draw[->,-latex] (x9) -- (x2);
+        \draw[->,-latex] (x10) -- (x3);
+        \draw[->,-latex] (x11) -- (x4);
+    \end{tikzpicture}
+
+    \label{LastPage}
+\end{document}
